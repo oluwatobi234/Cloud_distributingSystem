@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    build: ./sql
+    container_name: mysql-server
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: comp20081
+      MYSQL_USER: comp20081_user
+      MYSQL_PASSWORD: comp20081_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # phpMyAdmin to view MySQL
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # File Storage 1
+  filestorage1:
+    build: ./FileStorage
+    container_name: filestorage1
+    ports:
+      - "8082:8082"
+    volumes:
+      - storage1_data:/app/storage
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # File Storage 2
+  filestorage2:
+    build: ./FileStorage2
+    container_name: filestorage2
+    ports:
+      - "8083:8083"
+    volumes:
+      - storage2_data:/app/storage
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Load Balancer
+  loadbalancer:
+    build: ./LoadBalancer
+    container_name: loadbalancer
+    environment:
+      - STORAGE_1_URL=http://filestorage1:8082
+      - STORAGE_2_URL=http://filestorage2:8083
+    ports:
+      - "8081:8081"
+    depends_on:
+      - filestorage1
+      - filestorage2
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # File Partitioner
+  filepartitioner:
+    build: ./FilePartitioner
+    container_name: filepartitioner
+    environment:
+      - STORAGE_1_URL=http://filestorage1:8082
+      - STORAGE_2_URL=http://filestorage2:8083
+    ports:
+      - "8084:8084"
+    depends_on:
+      - filestorage1
+      - filestorage2
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Host Manager
+  hostmanager:
+    build: ./HostManager
+    container_name: hostmanager
+    environment:
+      - LOAD_BALANCER_URL=http://loadbalancer:8081
+      - FILE_PARTITIONER_URL=http://filepartitioner:8084
+      - FILE_STORAGE_1_URL=http://filestorage1:8082
+      - FILE_STORAGE_2_URL=http://filestorage2:8083
+      - MYSQL_URL=mysql:3306
+    ports:
+      - "8085:8085"
+    depends_on:
+      - loadbalancer
+      - filepartitioner
+      - mysql
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # CWK / JavaFX Application
+  cwk:
+    build: ./JavaFXApplication1
+    container_name: cwk-app
+    environment:
+      - LOAD_BALANCER_URL=http://loadbalancer:8081
+      - HOST_MANAGER_URL=http://hostmanager:8085
+      - MYSQL_URL=mysql:3306
+      - MYSQL_USER=comp20081_user
+      - MYSQL_PASSWORD=comp20081_pass
+      # For GUI display (optional - complex setup)
+      - DISPLAY=host.docker.internal:0
+    ports:
+      - "8086:8080"
+    volumes:
+      - cwk_data:/app/data
+      - cwk_storage:/app/storage
+      # For X11 forwarding (GUI) - remove if headless
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    depends_on:
+      - loadbalancer
+      - hostmanager
+      - mysql
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  storage1_data:
+  storage2_data:
+  cwk_data:
+  cwk_storage:

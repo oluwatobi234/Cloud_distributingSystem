@@ -1,0 +1,6 @@
+com\mycompany\hostmanager\HostManager$LogsHandler.class
+com\mycompany\hostmanager\HostManager.class
+com\mycompany\hostmanager\HostManager$LogHandler.class
+com\mycompany\hostmanager\HostManager$HealthHandler.class
+com\mycompany\hostmanager\HostManager$MetricsHandler.class
+com\mycompany\hostmanager\HostManager$DashboardHandler.class

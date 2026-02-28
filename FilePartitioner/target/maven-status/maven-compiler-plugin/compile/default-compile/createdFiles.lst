@@ -1,0 +1,9 @@
+com\mycompany\filepartitioner\FilePartitioner$DownloadHandler.class
+com\mycompany\filepartitioner\ChunkUtil.class
+com\mycompany\filepartitioner\ChunkUtil$Chunk.class
+com\mycompany\filepartitioner\FilePartitioner.class
+com\mycompany\filepartitioner\FilePartitioner$DeleteHandler.class
+com\mycompany\filepartitioner\LockManager.class
+com\mycompany\filepartitioner\FilePartitioner$HealthHandler.class
+com\mycompany\filepartitioner\EncryptionUtil.class
+com\mycompany\filepartitioner\FilePartitioner$UploadHandler.class

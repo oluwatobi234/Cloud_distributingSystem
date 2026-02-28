@@ -1,0 +1,5 @@
+com\mycompany\filestorage\FileStorageServer.class
+com\mycompany\filestorage\FileStorageServer$DownloadHandler.class
+com\mycompany\filestorage\FileStorageServer$UploadHandler.class
+com\mycompany\filestorage\FileStorageServer$DeleteHandler.class
+com\mycompany\filestorage\FileStorageServer$HealthHandler.class
